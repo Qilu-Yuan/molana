@@ -24,6 +24,6 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void Properity(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol, vector<vector<double>>& RX, vector<vector<double>>& PX);
+void Properity(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol, const vector<Vector3D>& RX, const vector<Vector3D>& PX);
 
-int main(int argc, char* argv[]);
+int main();

@@ -1,8 +1,8 @@
 #include"GetStat.h"
 
-void Properity(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol, vector<vector<double>>& RX, vector<vector<double>>& PX){
-    RDF(Switch,NPart,Box,Vol,RX,PX);
-    SSF(Switch,NPart,Box,Vol,RX,PX);
+void Properity(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol, const vector<Vector3D>& RX, const vector<Vector3D>& PX){
+    RDF(Switch,NPart,Box,Vol,RX);
+    SSF(Switch,NPart,Box,Vol,RX);
     PSP(Switch,NPart,NBead,NPoly,Box,Vol,RX,PX);
     ANG(Switch,NPart,NBead,NPoly,Box,Vol,RX,PX);
     LB2(Switch,NPart,NBead,NPoly,Box,Vol,RX,PX);
@@ -11,7 +11,7 @@ void Properity(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *V
 }
 
 
-int main(int argc, char* argv[]){
+int main(){
 
     int NPart, NBead, NPoly; //Npart--number of particles, NBead--number of particles on a chain, Npoly-Number of polymers
     double Box,Vol,Rho,Temp,Pres;
@@ -48,16 +48,14 @@ int main(int argc, char* argv[]){
 	Log<<"  Pressure                      :    "<<Pres<<endl<<endl;
 
     //Vector
-    vector<vector<double>> RX(NPart, vector<double>(3, 0.0));
-    vector<vector<double>> PX(NPoly, vector<double>(3, 0.0));
+    const vector<Vector3D> RX(NPart, Vector3D(0.0, 0.0, 0.0));
+    vector<Vector3D> PX(NPoly, Vector3D(0.0, 0.0, 0.0));
 
 	FStatic = int(round(double(NFrame)/1000));
 	Foutput = int(round(double(NFrame)/10));
     if (FStatic==0){
         FStatic = 1;
     } 
-
-
     Log.close();
 
     Properity(0,&NPart,&NBead,&NPoly,&Box,&Vol,RX,PX);
@@ -68,27 +66,21 @@ int main(int argc, char* argv[]){
 
     auto input = chemfiles::Trajectory("../Conf/CoordL.dcd",'r');
 
-   
     for(int i = 1;i<=NFrame;i++){
 
-        auto Frame = input.read();
+        const auto Frame = input.read();
 
-        auto positions = Frame.positions();
-
-        for (int i=0;i<NPart;i++){
-            RX[i][0]=positions[i][0];
-            RX[i][1]=positions[i][1];
-            RX[i][2]=positions[i][2];
-        }
+        auto RX1 = Frame.positions();
 
         for (int i=0;i<NPoly;i++){
             PX[i][0] = 0;
             PX[i][1] = 0;
             PX[i][2] = 0;
             for (int j=0;j<NBead;j++){
-                PX[i][0] += RX[i*NBead+j][0];
-                PX[i][1] += RX[i*NBead+j][1];
-                PX[i][2] += RX[i*NBead+j][2];
+                int k = i*NBead+j;
+                PX[i][0] += RX1[k][0];
+                PX[i][1] += RX1[k][1];
+                PX[i][2] += RX1[k][2];
             }
             PX[i][0] = PX[i][0]/NBead;
             PX[i][1] = PX[i][1]/NBead;
@@ -97,10 +89,10 @@ int main(int argc, char* argv[]){
         
         if(i%10 ==0) cout<<i<<" "<<NFrame<<endl;
 
-        if(i%FStatic==0) Properity(1,&NPart,&NBead,&NPoly,&Box,&Vol,RX,PX);
+        if(i%FStatic==0) Properity(1,&NPart,&NBead,&NPoly,&Box,&Vol,RX1,PX);
         
         if(i%Foutput==0){
-            Properity(2,&NPart,&NBead,&NPoly,&Box,&Vol,RX,PX);
+            Properity(2,&NPart,&NBead,&NPoly,&Box,&Vol,RX1,PX);
             Log1<<"#frames completed: "<< i <<endl;
         } 
     }
@@ -111,6 +103,6 @@ int main(int argc, char* argv[]){
 
     TimeFinal = time(NULL);
 
-    Log1<<"Total time is "<<(TimeFinal-TimeStart)/60<<" minutes"<<endl;
+    Log1<<"Total time is "<<double(TimeFinal-TimeStart)/60.0<<" minutes"<<endl;
     Log1.close();
 }
