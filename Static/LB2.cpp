@@ -1,6 +1,6 @@
 #include "LB2.h"
 
-void LB2(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,vector<vector<double>>& RX,vector<vector<double>>& PX){ //to calculate the angle and angle distribution
+void LB2(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX){ //to calculate the angle and angle distribution
     
     static int NStat,NBond,NBin;
     int Bin;

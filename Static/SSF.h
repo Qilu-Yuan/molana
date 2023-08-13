@@ -15,6 +15,6 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void SetSSF(double *Box,int *Qn,int *Qc,double **Qx,double **Qy,double **Qz,int *NQ,int Qmax,int QIMax,double Qrh);
+void SetSSF(double *Box,vector<int> &Qn,vector<int> &Qc,vector<vector<double>>& Qx,vector<vector<double>>& Qy,vector<vector<double>>& Qz,int *NQ,int Qmax,int QIMax,double Qrh);
 
-void SSF(int Switch,int *NPart,double *Box,double *Vol,vector<vector<double>>& RX,vector<vector<double>>& PX);
+void SSF(int Switch,int *NPart,double *Box,double *Vol,const vector<Vector3D>& RX);

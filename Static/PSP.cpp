@@ -1,7 +1,7 @@
 #include "PSP.h"
 
 
-void PSP(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,vector<vector<double>>& RX,vector<vector<double>>& PX){ //to calculate polymer specific properity
+void PSP(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX){ //to calculate polymer specific properity
     
     static int NStat;
     

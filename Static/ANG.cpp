@@ -1,6 +1,6 @@
 #include "ANG.h"
 
-void ANG(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,vector<vector<double>>& RX,vector<vector<double>>& PX){ //to calculate the angle and angle distribution
+void ANG(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX){ //to calculate the angle and angle distribution
     
     static int NStat,NAngle,NBin;
     int Bin;
@@ -9,7 +9,6 @@ void ANG(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,vec
     
     double dxij[3],dxjk[3],rij2,rjk2;
     static vector<double> RBin,VBin,PTheta;
-    // static double *RBin,*VBin,*PTheta;
 
 
     if (Switch == 1){

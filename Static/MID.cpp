@@ -1,6 +1,6 @@
 #include "MID.h"
 
-void MID(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,vector<vector<double>>& RX,vector<vector<double>>& PX){ //to calculate compute mean-square internal distance
+void MID(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX){ //to calculate compute mean-square internal distance
     
     static int NStat;
     double dx[3],r2,MID;

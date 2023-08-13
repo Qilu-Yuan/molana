@@ -60,7 +60,7 @@ void SetSSF(double *Box,vector<int> &Qn,vector<int> &Qc,vector<vector<double>>& 
 
 
 
-void SSF(int Switch,int *NPart,double *Box,double *Vol,vector<vector<double>>& RX,vector<vector<double>>& PX){
+void SSF(int Switch,int *NPart,double *Box,double *Vol,const vector<Vector3D>& RX){
     const int Qmax = 10000, QIMax= 20; // Maximum number of Q values
     static int NQ;
     const double Qrh=15.0;
