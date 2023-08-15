@@ -15,4 +15,16 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void PSP(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX);
+class PSP
+{
+private:
+    /* data */
+    int NStat;
+    double SumRe2, SumRg2;
+    vector<double> Fbb;
+    vector<vector<double>> LX,UX;
+public:
+    void set(int *NBead,fstream& Log);
+    void calcluate(int* NBead,int* NPoly,const vector<Vector3D>& RX,const vector<Vector3D>& PX);
+    void write(int *NBead,int *NPoly);
+};

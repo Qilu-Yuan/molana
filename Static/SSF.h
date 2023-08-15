@@ -15,6 +15,20 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void SetSSF(double *Box,vector<int> &Qn,vector<int> &Qc,vector<vector<double>>& Qx,vector<vector<double>>& Qy,vector<vector<double>>& Qz,int *NQ,int Qmax,int QIMax,double Qrh);
+class SSF
+{
+private:
+    /* data */
+    const int Qmax = 10000,QIMax = 20;
+    const double Qrh = 15.0;
+    int NQ,NStat;
+    vector<int> Qn,Qc;
+    vector<vector<double>> Qx,Qy,Qz;
+    vector<double> Q, Sbb;
 
-void SSF(int Switch,int *NPart,double *Box,double *Vol,const vector<Vector3D>& RX);
+public:
+    void set(double *Box,fstream& Log);
+    void calcluate(int *NPart,const vector<Vector3D>& RX);
+    void write(int *NPart);
+};
+

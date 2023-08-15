@@ -1,6 +1,69 @@
 #include"SSF.h"
 
-void SetSSF(double *Box,vector<int> &Qn,vector<int> &Qc,vector<vector<double>>& Qx,vector<vector<double>>& Qy,vector<vector<double>>& Qz,int *NQ,int Qmax,int QIMax,double Qrh){
+void SetSSF(double *Box,vector<int> &Qn,vector<int> &Qc,vector<vector<double>>& Qx,vector<vector<double>>& Qy,vector<vector<double>>& Qz,int *NQ,const int Qmax,const int QIMax,const double Qrh);
+
+void SSF::set(double *Box,fstream& Log){
+    NStat = 0;
+
+    Qn.resize(Qmax);
+    Qc.resize(Qmax);
+    
+    Qx.resize(Qmax);
+    Qy.resize(Qmax);
+    Qz.resize(Qmax);
+    for(int i=0;i<Qmax;i++){
+        Qx[i].resize(QIMax);
+        Qy[i].resize(QIMax);
+        Qz[i].resize(QIMax);
+    }
+    SetSSF(Box,Qn,Qc,Qx,Qy,Qz,&NQ,Qmax,QIMax,Qrh);
+
+    Q.resize(NQ);
+    Sbb.resize(NQ);
+
+    for(int i=0;i<NQ;i++){
+        Q[i] = 2*M_PI/(*Box)*sqrt(double(Qc[i]));
+        Sbb[i] = 0.0;
+    }
+    Log << "  To calculate SSF" <<endl;
+    Log << "     Number of Q values = " << NQ <<endl;
+    Log << "     Minimun & Maximum Q value = " << Q[0]<<" "<<Q[NQ-1] <<endl;
+
+
+}
+
+void SSF::calcluate(int *NPart,const vector<Vector3D>& RX){
+    double SumCOS, SumSIN;
+    NStat = NStat + 1;
+        
+    for(int i=0;i<NQ;i++){
+        for(int j=0;j<Qn[i];j++){
+            // Kx = Qx[i][j];
+            // Ky = Qy[i][j];
+            // Kz = Qz[i][j];
+
+            SumCOS = 0.0;
+            SumSIN = 0.0;
+            for(int k=0;k<*NPart;k++){
+                SumCOS = SumCOS + cos(Qx[i][j]*RX[k][0] + Qy[i][j]*RX[k][1] + Qz[i][j]*RX[k][2]);
+                SumSIN = SumSIN + sin(Qx[i][j]*RX[k][0] + Qy[i][j]*RX[k][1] + Qz[i][j]*RX[k][2]);
+            }
+            Sbb[i] = Sbb[i] + pow(SumCOS,2) + pow(SumSIN,2);
+        }
+    }
+}
+
+void SSF::write(int *NPart){
+        fstream SSF;
+        SSF.open("SSF",ios::out);
+        for(int i=0;i<NQ;i++){
+            double ssf = Sbb[i]/(double(NStat)*double(*NPart)*double(Qn[i]));
+            SSF<<scientific<<setprecision(8)<<Q[i]<<" "<<ssf<<endl;
+        }
+        SSF.close();
+}
+
+void SetSSF(double *Box,vector<int> &Qn,vector<int> &Qc,vector<vector<double>>& Qx,vector<vector<double>>& Qy,vector<vector<double>>& Qz,int *NQ,const int Qmax,const int QIMax,const double Qrh){
     int Qih,Nk,Kx,Ky,Kz,K2,Ks;
     vector<int> Kn,Kc;
 
@@ -56,82 +119,4 @@ void SetSSF(double *Box,vector<int> &Qn,vector<int> &Qc,vector<vector<double>>& 
         }
     }
 
-}
-
-
-
-void SSF(int Switch,int *NPart,double *Box,double *Vol,const vector<Vector3D>& RX){
-    const int Qmax = 10000, QIMax= 20; // Maximum number of Q values
-    static int NQ;
-    const double Qrh=15.0;
-    static vector<int> Qn,Qc;
-    static vector<vector<double>> Qx,Qy,Qz;
-
-    double Kx, Ky, Kz, SumCOS, SumSIN, SSF;
-    static int NStat;
-
-    static double *Q,*Sbb;
-
-    if (Switch == 1){
-        NStat = NStat + 1;
-		
-		for(int i=0;i<NQ;i++){
-            for(int j=0;j<Qn[i];j++){
-                Kx = Qx[i][j];
-                Ky = Qy[i][j];
-                Kz = Qz[i][j];
-
-                SumCOS = 0.0;
-                SumSIN = 0.0;
-                for(int k=0;k<*NPart;k++){
-                    SumCOS = SumCOS + cos(Kx*RX[k][0] + Ky*RX[k][1] + Kz*RX[k][2]);
-                    SumSIN = SumSIN + sin(Kx*RX[k][0] + Ky*RX[k][1] + Kz*RX[k][2]);
-                }
-                Sbb[i] = Sbb[i] + pow(SumCOS,2) + pow(SumSIN,2);
-            }
-        }
-    }         
-    else if (Switch == 0){
-        NStat = 0;
-
-        Qn.resize(Qmax);
-        Qc.resize(Qmax);
-        
-        Qx.resize(Qmax);
-        Qy.resize(Qmax);
-        Qz.resize(Qmax);
-        for(int i=0;i<Qmax;i++){
-            Qx[i].resize(QIMax);
-            Qy[i].resize(QIMax);
-            Qz[i].resize(QIMax);
-        }
-
-
-        SetSSF(Box,Qn,Qc,Qx,Qy,Qz,&NQ,Qmax,QIMax,Qrh);
-
-        Q = (double*) calloc(NQ, sizeof(double));
-        Sbb = (double*) calloc(NQ, sizeof(double));
-        
-        for(int i=0;i<NQ;i++){
-            Q[i] = 2*M_PI/(*Box)*sqrt(double(Qc[i]));
-            Sbb[i] = 0.0;
-        }
-
-        fstream Log;
-        Log.open("LogStat",ios::app);
-        Log << "  To calculate SSF" <<endl;
-        Log << "     Number of Q values = " << NQ <<endl;
-        Log << "     Minimun & Maximum Q value = " << Q[0]<<" "<<Q[NQ-1] <<endl;
-        Log.close();
-    }
-    else if (Switch ==2 ){
-        fstream SSF;
-        SSF.open("SSF",ios::out);
-        for(int i=0;i<NQ;i++){
-            double ssf = Sbb[i]/(double(NStat)*double(*NPart)*double(Qn[i]));
-
-            SSF<<scientific<<setprecision(8)<<Q[i]<<" "<<ssf<<endl;
-        }
-        SSF.close();
-    }
 }

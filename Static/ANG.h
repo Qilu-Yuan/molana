@@ -15,4 +15,16 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void ANG(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX);
+class ANG
+{
+private:
+    /* data */
+    int NStat,NAngle,NBin;
+    double DelR, SumCOSTheta,SumTheta;
+    vector<double> RBin,VBin,PTheta;
+public:
+    void set(int *NBead,int *NPoly,fstream& Log);
+    void calcluate(int *NBead,int *NPoly,const vector<Vector3D>& RX);
+    void write(int *NBead,int *NPoly);
+};
+

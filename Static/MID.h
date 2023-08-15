@@ -15,4 +15,14 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void MID(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX);
+class MID
+{
+private:
+        /* data */
+    vector<double> Acc,Sum,Rn2;
+    int NStat;
+public:
+    void set(int *NBead,fstream& Log);
+    void calcluate(int* NBead,int* NPoly,const vector<Vector3D>& RX);
+    void write(int *NBead);
+};

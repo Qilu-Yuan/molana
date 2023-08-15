@@ -15,4 +15,18 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void LB2(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol,const vector<Vector3D>& RX,const vector<Vector3D>& PX);
+
+class LB2
+{
+private:
+        /* data */
+    int NStat,NBond,NBin;
+    double DelR, SumR2;
+    vector<double> RBin,VBin,PR2;
+
+public:
+    void set(int *NBead,int *NPoly,fstream& Log);
+    void calcluate(int* NBead,int* NPoly,const vector<Vector3D>& RX);
+    void write(int *NBead);
+};
+

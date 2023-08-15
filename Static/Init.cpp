@@ -1,26 +1,17 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctime>
-#include <cmath>
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <chemfiles.hpp>
-#include<iomanip>
-#include<fstream>
-
-using namespace std;
-using namespace chemfiles;
-using std::string;
-using std::stringstream;
-// using chemfiles::Trajectory;
+// Date: 2021/4/10
+#include"Init.h"
 
 void cpu_time(string& Time){
     time_t nowtime;
     time(&nowtime);
     stringstream ftm;
     tm *p = localtime(&nowtime);
-    ftm << "Date & Time: "<<p->tm_year+1900 <<"-"<<p->tm_mon+1<<"-"<<p->tm_mday<<","<<p->tm_hour<<":"<<p->tm_min<<":"<<p->tm_sec;
+    ftm << "Date & Time: " <<setw(2) <<setfill('0')<<p->tm_year+1900 <<"-";
+    ftm<<setw(2)<<setfill('0')<<p->tm_mon+1<<"-";
+    ftm<<setw(2)<<setfill('0')<<p->tm_mday<<",";
+    ftm<<setw(2)<<setfill('0')<<p->tm_hour<<":";
+    ftm<<setw(2)<<setfill('0')<<p->tm_min<<":";
+    ftm<<setw(2)<<setfill('0')<<p->tm_sec;
     Time = ftm.str();
 }
 

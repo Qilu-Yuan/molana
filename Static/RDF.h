@@ -15,4 +15,15 @@ using namespace chemfiles;
 using std::string;
 using std::stringstream;
 
-void RDF(int Switch, int* NPart, double* Box, double* Vol, const vector<Vector3D>& RX);
+class RDF
+{
+private:
+    /* data */
+    int NStat,NBin;
+    double DelR;
+    vector<double> RBin,VBin,Gbb;
+public:
+    void set(double *Box,fstream& Log);
+    void calcluate(double *Box,int *NPart,const vector<Vector3D>& RX);
+    void write(double *Vol,int *NPart);
+};
