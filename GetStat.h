@@ -11,19 +11,12 @@
 #include<vector>
 
 #include"./Static/Init.h"
-#include"./Static/RDF.h"
-#include"./Static/SSF.h"
-#include"./Static/PSP.h"
-#include"./Static/ANG.h"
-#include"./Static/LB2.h"
-#include"./Static/MID.h"
+#include"./Static/Properity.h"
 
 
 using namespace std;
 using namespace chemfiles;
 using std::string;
 using std::stringstream;
-
-void Properity(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol, const vector<Vector3D>& RX, const vector<Vector3D>& PX);
 
 int main();

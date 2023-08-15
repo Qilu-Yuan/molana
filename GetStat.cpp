@@ -1,16 +1,5 @@
 #include"GetStat.h"
 
-void Properity(int Switch,int *NPart,int *NBead,int *NPoly,double *Box,double *Vol, const vector<Vector3D>& RX, const vector<Vector3D>& PX){
-    RDF(Switch,NPart,Box,Vol,RX);
-    SSF(Switch,NPart,Box,Vol,RX);
-    PSP(Switch,NPart,NBead,NPoly,Box,Vol,RX,PX);
-    ANG(Switch,NPart,NBead,NPoly,Box,Vol,RX,PX);
-    LB2(Switch,NPart,NBead,NPoly,Box,Vol,RX,PX);
-    MID(Switch,NPart,NBead,NPoly,Box,Vol,RX,PX);
-
-}
-
-
 int main(){
 
     int NPart, NBead, NPoly; //Npart--number of particles, NBead--number of particles on a chain, Npoly-Number of polymers
@@ -47,25 +36,21 @@ int main(){
 	Log<<"  Temperature                   :    "<<Temp<<endl;
 	Log<<"  Pressure                      :    "<<Pres<<endl<<endl;
 
-    //Vector
-    const vector<Vector3D> RX(NPart, Vector3D(0.0, 0.0, 0.0));
-    vector<Vector3D> PX(NPoly, Vector3D(0.0, 0.0, 0.0));
 
 	FStatic = int(round(double(NFrame)/1000));
 	Foutput = int(round(double(NFrame)/10));
     if (FStatic==0){
         FStatic = 1;
     } 
-    Log.close();
 
-    Properity(0,&NPart,&NBead,&NPoly,&Box,&Vol,RX,PX);
+    Properties Properties1(&NPart,&NBead,&NPoly,&Box,&Vol,Log);
 
-    fstream Log1;
-    Log1.open("LogStat",ios::app);
-    Log1<<endl<<"---->>calculation begins"<<endl;
+    Log<<endl<<"---->>calculation begins"<<endl;
 
     auto input = chemfiles::Trajectory("../Conf/CoordL.dcd",'r');
 
+    vector<Vector3D> PX(NPoly, Vector3D(0.0, 0.0, 0.0));
+    
     for(int i = 1;i<=NFrame;i++){
 
         const auto Frame = input.read();
@@ -86,23 +71,24 @@ int main(){
             PX[i][1] = PX[i][1]/NBead;
             PX[i][2] = PX[i][2]/NBead;
         }
-        
-        if(i%10 ==0) cout<<i<<" "<<NFrame<<endl;
 
-        if(i%FStatic==0) Properity(1,&NPart,&NBead,&NPoly,&Box,&Vol,RX1,PX);
+        if(i%10 ==0) cout<<i<<" "<<NFrame<<endl;
+         if(i%FStatic==0) Properties1.calcluate(RX1,PX);
         
         if(i%Foutput==0){
-            Properity(2,&NPart,&NBead,&NPoly,&Box,&Vol,RX1,PX);
-            Log1<<"#frames completed: "<< i <<endl;
+            Properties1.write();
+            // Ang1.write(&NBead,&NPoly);
+            Log<<"#frames completed: "<< i <<endl;
         } 
     }
     input.close();
-    Properity(2,&NPart,&NBead,&NPoly,&Box,&Vol,RX,PX);
+    // Ang1.write(&NBead,&NPoly);//
+    Properties1.write();
 
-    Log1<<"<<----calculation completed"<< endl <<endl;
+    Log<<"<<----calculation completed"<< endl <<endl;
 
     TimeFinal = time(NULL);
 
-    Log1<<"Total time is "<<double(TimeFinal-TimeStart)/60.0<<" minutes"<<endl;
-    Log1.close();
+    Log<<"Total time is "<<double(TimeFinal-TimeStart)/60.0<<" minutes"<<endl;
+    Log.close();
 }
