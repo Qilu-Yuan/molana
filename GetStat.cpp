@@ -1,14 +1,18 @@
 #include"GetStat.h"
 
 int main(){
-
     int NPart, NBead, NPoly; //Npart--number of particles, NBead--number of particles on a chain, Npoly-Number of polymers
     double Box,Vol,Rho,Temp,Pres;
 	int NFrame,NAtom,NItem,NStep, FStatic, Foutput;
-
+    int Nevery = 5,Nrepeat =1000,Nfreq=5000;
 	time_t TimeStart, TimeFinal;
     string Time;
 
+    // int Nevery = 2,Nrepeat =6,Nfreq=100;
+    if (Nevery <= 0 || Nrepeat <= 0 || Nfreq <= 0 || Nrepeat*Nevery>Nfreq){
+        cout<<"Illegal Parameter!"<<endl;
+        return 1;
+    }  
     TimeStart = time(NULL);
 
     cpu_time(Time);
@@ -17,8 +21,12 @@ int main(){
 
     Log.open("LogStat",ios::out);Log<<Time<<endl<<endl;
 
-
+    
     Init(&NPart,&NBead,&NPoly,&Box,&Vol,&Rho,&NItem,&NStep,&Temp,&Pres,&NFrame, &NAtom);
+
+    int Ncycle = NFrame/Nfreq;
+
+    int NTRE = Ncycle*(Nrepeat); //the total repeat times
 
     if (NAtom != NPart){
         cout<<"NAtom from DCD file is inconsistent with NPart!"<<endl;
@@ -30,59 +38,68 @@ int main(){
     Log<<"  Chain number                  :    "<<NPoly <<endl;
     Log<<"  Box dimension                 :    "<<Box   <<endl;
     Log<<"  Number density                :    "<<Rho   <<endl<<endl;
+    Log<<"  Number of atoms  in Trajectory:    "<<NAtom <<endl;
     Log<<"  Number of frames in Trajectory:    "<<NFrame<<endl;
-    Log<<"  Number of atoms  in Trajectory:    "<<NAtom <<endl<<endl;
+    Log<<"  Number of frames to Be Read   :    "<<NTRE<<endl<<endl;
 	Log<<"  Data info in Thermo           :    "<<NItem<<" , "<< NStep<<endl;
 	Log<<"  Temperature                   :    "<<Temp<<endl;
 	Log<<"  Pressure                      :    "<<Pres<<endl<<endl;
-
-
-	FStatic = int(round(double(NFrame)/1000));
-	Foutput = int(round(double(NFrame)/10));
-    if (FStatic==0){
-        FStatic = 1;
-    } 
 
     Properties Properties1(&NPart,&NBead,&NPoly,&Box,&Vol,Log);
 
     Log<<endl<<"---->>calculation begins"<<endl;
 
+
     auto input = chemfiles::Trajectory("../Conf/CoordL.dcd",'r');
 
     vector<Vector3D> PX(NPoly, Vector3D(0.0, 0.0, 0.0));
-    
-    for(int i = 1;i<=NFrame;i++){
+    vector<vector<Vector3D>> RX(NTRE, vector<Vector3D>(NPart, Vector3D(0.0, 0.0, 0.0)));
 
+///////////read the frames to be calculated////////////
+    int r = 0;
+    cout << "Frame ";
+    for(int i = 1;i<=NFrame&&r<NTRE;i++){
         const auto Frame = input.read();
+        
+        int Nrepeatleft;
+        if(i%Nfreq ==1) Nrepeatleft = Nrepeat;
 
-        auto RX1 = Frame.positions();
+        if((i+(Nevery*(Nrepeatleft-1)))%Nfreq==0 && Nrepeatleft>0){
+            RX[r] = Frame.positions();
+            r++;
+            Nrepeatleft--;
+            cout << i <<" ";
+        }
+    }
+    cout<< " are read." << endl;
 
-        for (int i=0;i<NPoly;i++){
-            PX[i][0] = 0;
-            PX[i][1] = 0;
-            PX[i][2] = 0;
-            for (int j=0;j<NBead;j++){
-                int k = i*NBead+j;
-                PX[i][0] += RX1[k][0];
-                PX[i][1] += RX1[k][1];
-                PX[i][2] += RX1[k][2];
+    input.close();
+/////////////////////////////////////////////////////
+    Foutput = int(round(double(NTRE)/10));
+    for(int i = 0;i<NTRE;i++){
+        for (int j=0;j<NPoly;j++){
+            PX[j][0] = 0;
+            PX[j][1] = 0;
+            PX[j][2] = 0;
+            for (int k=0;k<NBead;k++){
+                int l = j*NBead+k;
+                PX[j][0] += RX[i][l][0];
+                PX[j][1] += RX[i][l][1];
+                PX[j][2] += RX[i][l][2];
             }
-            PX[i][0] = PX[i][0]/NBead;
-            PX[i][1] = PX[i][1]/NBead;
-            PX[i][2] = PX[i][2]/NBead;
+            PX[j][0] = PX[j][0]/NBead;
+            PX[j][1] = PX[j][1]/NBead;
+            PX[j][2] = PX[j][2]/NBead;
         }
 
-        if(i%10 ==0) cout<<i<<" "<<NFrame<<endl;
-         if(i%FStatic==0) Properties1.calcluate(RX1,PX);
-        
-        if(i%Foutput==0){
+        Properties1.calcluate(RX[i],PX);
+        cout<<i<<" "<<NTRE<<endl;    
+        if((i+1)%Foutput==0){
             Properties1.write();
-            // Ang1.write(&NBead,&NPoly);
-            Log<<"#frames completed: "<< i <<endl;
+            Log<<"#frames completed: "<< i+1 <<endl;
         } 
     }
-    input.close();
-    // Ang1.write(&NBead,&NPoly);//
+
     Properties1.write();
 
     Log<<"<<----calculation completed"<< endl <<endl;
