@@ -6,7 +6,8 @@ int main(){
 	int NFrame,NAtom,NItem,NStep, FStatic, Foutput;
     double Delt_in[3], TProd_in[3],Delt;
     int IT0,TMax;
-    int T0Max = 100;
+    int T0Max = 100;//the number of anverage times
+    
 
     char Type[] ="LMS"; //to calculate the three types of TCF:long time(L);middle time(M);short time(S)
 
